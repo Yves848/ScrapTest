@@ -8,7 +8,7 @@ async function getNotebooks() {
     const $=cheerio.load(data);
     //#content > div.mp-Page-element.mp-Page-element--main
     const table = $('ul.mp-Listings.mp-Listings--list-view');
-    table.find('li').each((i, element) => {
+    table.find('h3.mp-Listing-title').each((i, element) => {
         
         const $element = $(element);
          //element.children[0].nodeValue()
