@@ -6,15 +6,22 @@ const page_url = 'https://www.2ememain.be/l/informatique-logiciels/portables-et-
 async function getNotebooks() {
     const {data} = await axios.get(page_url);
     const $=cheerio.load(data);
+    const pagination = $('.mp-PaginationControls');
+    //console.log(pagination);
     //#content > div.mp-Page-element.mp-Page-element--main
+    const spans = $('.mp-Filter-counter');
+    const $spans = $(spans);
+    console.log($spans);
     const table = $('ul.mp-Listings.mp-Listings--list-view');
-    table.find('h3.mp-Listing-title').each((i, element) => {
+    //const table = $('.mp-Listing--list-item');
+    table.find('.mp-Listing--list-item').each((i, element) => {
         
         const $element = $(element);
          //element.children[0].nodeValue()
-        console.log($element.text());
+        console.log($element.find('.mp-Listing-title').text());
+        console.log($element.find('.mp-text-price-label').text());
         
-        console.log('##########################################################################################################');
+        //console.log('##########################################################################################################');
     });
     
 
