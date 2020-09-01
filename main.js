@@ -51,7 +51,7 @@ async function getAds( page) {
             const description = await getContent(detail_url);
             const patt = new RegExp('media-monster', 'gi');
             if (!patt.test(vendor)) {
-                const brand = new RegExp('lenovo', 'gim');
+                const brand = new RegExp('t470', 'gim');
                 if (brand.test(description)) {
                     //console.log(vendor);
                     //console.log(title,price);
@@ -60,7 +60,8 @@ async function getAds( page) {
                         title: title,
                         vendor: vendor,
                         price: price,
-                        description: description
+                        description: description,
+                        link: detail_url
                     })
                 }
             }
