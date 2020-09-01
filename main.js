@@ -1,9 +1,9 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 let page = 1;
-let i = 0;
-
-
+let count = 0;
+let o  = {};
+o['tree'] = [];
 
 async function getCounters() {
     return new Promise(async resolve => {
@@ -20,43 +20,70 @@ async function getCounters() {
     });
 }
 
-async function getNotebooks(nb,page) {
+async function getContent(page) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const { data } = await axios.get(page);
+            const $ = cheerio.load(data);
+            const description = $('div#vip-ad-description');
+            //console.log($(description).text());
+            resolve($(description).text());
+        } catch (error) {
+            reject(error);
+        }
+
+    })
+}
+
+async function getAds( page) {
     return new Promise(async resolve => {
         const { data } = await axios.get(page);
         const $ = cheerio.load(data);
         const table = $('ul.mp-Listings.mp-Listings--list-view');
-
-
-        table.find('.mp-Listing--list-item').each((i, element) => {
-
+        
+        table.find('.mp-Listing--list-item').each( async (i, element) => {
             const $element = $(element);
             const vendor = $($element.find('.mp-Listing-seller-name-container')).text();
-
+            const title = $($element.find('.mp-Listing-title')).text();
+            const price = $($element.find('.mp-Listing-price.mp-text-price-label')).text().replace(/€\s/g, '');
+            const link = $($element.find('.mp-Listing-coverLink')).attr('href');
+            const detail_url = `https://www.2ememain.be${link}`;
+            const description = await getContent(detail_url);
             const patt = new RegExp('media-monster', 'gi');
             if (!patt.test(vendor)) {
-                console.log(vendor);
-
+                const brand = new RegExp('lenovo', 'gim');
+                if (brand.test(description)) {
+                    //console.log(vendor);
+                    //console.log(title,price);
+                    //console.log(description);
+                    o['tree'].push({
+                        title: title,
+                        vendor: vendor,
+                        price: price,
+                        description: description
+                    })
+                }
             }
-
-            nb++;
+            count++;
         });
-        resolve(nb);
+        resolve(count);
     })
 
 }
 
-async function getAds() {
+async function run() {
     const nbAds = await getCounters();
     let page = 1;
-    let i = 0;
     
+
     console.log(nbAds);
     do {
-         const page_url = `https://www.2ememain.be/l/informatique-logiciels/portables-et-notebooks/p/${page}/#Language:fr-BE|postcode:6061|limit:100`;
-        const r = await getNotebooks(i,page_url);
+        const page_url = `https://www.2ememain.be/l/informatique-logiciels/portables-et-notebooks/p/${page}/#Language:fr-BE|postcode:6061|limit:100`;
+        const r = await getAds(page_url);
         page++;
-        i = r;
-    } while (i <= nbAds)
+        
+    } while (count <= nbAds)
+    console.log(o);
 }
 
-getAds();
+run();
